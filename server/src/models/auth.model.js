@@ -92,10 +92,10 @@ const userSchema = new Schema({
 }, { timestamps: true });
 
 userSchema.methods.toJSON = function () {
-  const obj = this.toObject();
-  delete obj.password;
-  delete obj.refreshToken;
-  return obj;
+    const obj = this.toObject();
+    delete obj.password;
+    delete obj.refreshToken;
+    return obj;
 };
 
 userSchema.pre("save", async function (next) {
