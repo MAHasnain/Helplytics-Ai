@@ -10,10 +10,6 @@ router
     .route("/register")
     .post(registerUser);
 
-// router
-//     .route("/register-doctor")
-//     .post(upload.single("avatar"), registerDoctor);
-
 router
     .route("/login")
     .post(login)

@@ -21,7 +21,6 @@ app.use(express.static("public"));
 app.use(helmet());
 app.use(cookieParser())
 
-// Morgan middleware for logging HTTP requests, integrated with Winston logger
 app.use(morganMiddleware);
 app.use(
     morgan("combined", {
@@ -33,7 +32,13 @@ app.use(
 
 // Routes
 import authRouter from "./src/routes/auth.route.js";
+import notificationRouter from "./src/routes/notification.route.js";
+import requestRouter from "./src/routes/request.route.js";
+import userRouter from "./src/routes/users.route.js";
 
 app.use("/api/auth", authRouter);
+app.use("/api/notifications", notificationRouter);
+app.use("/api/requests", requestRouter);
+app.use("/api/users", userRouter);
 
 export default app;
