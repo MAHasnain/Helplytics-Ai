@@ -13,7 +13,7 @@ export interface loginUserPayload {
 
 }
 
-export interface updatedData {
+export interface UpdatedData {
     name?: string;
     username?: string;
     email?: string;
@@ -22,3 +22,27 @@ export interface updatedData {
     dob?: string;
     password?: string;
 }
+
+export interface AuthState{ 
+    user: any;
+    token: string | null;
+    isLoading: boolean;
+    error: string | null;
+
+    login: (userData: loginUserPayload) => Promise<{ success: boolean }>;
+    register: (userData: registerUserPayload) => Promise<{ success: boolean }>;
+    updateProfile: (userData: UpdatedData) => Promise<{ success: boolean }>;
+    logout: () => void;
+    clearError: () => void;
+}
+
+export interface UserState {
+    leaderboard: any[];
+    dashboard: any;
+    isLoading: boolean;
+    getLeaderboard: () => Promise<void>;
+    getDashboard: () => Promise<void>;
+    completeOnboarding: (formData: any) => Promise<{ success: boolean }>;
+
+}
+

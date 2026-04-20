@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import api from '@/lib/axios';
-import type { registerUserPayload, loginUserPayload, updatedData } from '@/types/auth';
+import type { registerUserPayload, loginUserPayload, UpdatedData, AuthState } from '@/types/auth';
 
 const useAuthStore = create(
     persist(
@@ -45,7 +45,7 @@ const useAuthStore = create(
                 }
             },
 
-            updateProfile: async (userData: updatedData) => {
+            updateProfile: async (userData: UpdatedData) => {
                 set({ isLoading: true, error: null });
                 try {
                     const { data } = await api.patch('/users/profile', userData);
@@ -75,10 +75,7 @@ const useAuthStore = create(
 
         {
             name: 'auth-storage',
-            partialize: (state: any) => ({
-                user: state.user,
-                token: state.token
-            }),
+            partialize: (state: AuthState) => ({ user: state.user, token: state.token }) as Partial<AuthState>,
         }
     )
 );

@@ -1,8 +1,9 @@
-// store/userStore.js
 import { create } from 'zustand';
 import api from '@/lib/axios';
+import { UserState } from '@/types/auth';
 
-const useUserStore = create((set) => ({
+const useUserStore = create<UserState>((set) => ({
+  
   leaderboard: [],
   dashboard: null,
   isLoading: false,
@@ -24,7 +25,7 @@ const useUserStore = create((set) => ({
     }
   },
 
-  completeOnboarding: async (formData) => {
+  completeOnboarding: async (formData: any) => {
     try {
       await api.post('/users/onboarding', formData);
       return { success: true };

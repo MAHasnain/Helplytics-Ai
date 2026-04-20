@@ -5,19 +5,19 @@ import useAuthStore from '@/store/authStore';
 import { TrendingUp, Users, BookOpen, CheckCircle, Medal, Plus, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
  
-const badgeColors = {
+const badgeColors: Record<string, { bg: string; border: string; text: string }> = {
   'First Helper':    { bg: 'rgba(200,185,110,0.08)', border: 'rgba(200,185,110,0.25)', text: '#c8b96e' },
   'Rising Star':     { bg: 'rgba(110,180,200,0.08)', border: 'rgba(110,180,200,0.25)', text: '#6eb4c8' },
   'Top Contributor': { bg: 'rgba(200,110,110,0.08)', border: 'rgba(200,110,110,0.25)', text: '#c87070' },
 };
  
-const statusStyle = {
+const statusStyle: Record<string, { bg: string; color: string; dot: string }> = {
   open:          { bg: 'rgba(110,160,110,0.1)',  color: '#6ea06e', dot: '#6ea06e' },
   'in-progress': { bg: 'rgba(180,150,80,0.1)',   color: '#b49650', dot: '#b49650' },
   solved:        { bg: 'rgba(128,128,200,0.1)',  color: '#8080c8', dot: '#8080c8' },
 };
  
-const statCards = (stats) => [
+const statCards = (stats: any) => [
   { label: 'Trust Score',   value: stats.trustScore    ?? 0, icon: TrendingUp,   accent: '#c8b96e' },
   { label: 'People Helped', value: stats.totalHelped   ?? 0, icon: Users,        accent: '#6ea06e' },
   { label: 'My Requests',   value: stats.totalRequests ?? 0, icon: BookOpen,     accent: '#8080c8' },
@@ -85,8 +85,8 @@ export default function DashboardPage() {
             </div>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-              {badges.map(badge => {
-                const s = badgeColors[badge] || { bg: 'rgba(240,235,224,0.05)', border: 'rgba(240,235,224,0.1)', text: 'rgba(240,235,224,0.6)' };
+              {badges.map((badge: string) => {
+                const s = badgeColors[badge as keyof typeof badgeColors] || { bg: 'rgba(240,235,224,0.05)', border: 'rgba(240,235,224,0.1)', text: 'rgba(240,235,224,0.6)' };
                 return (
                   <div key={badge} style={{ background: s.bg, border: `1px solid ${s.border}`, borderRadius: 8, padding: '10px 14px', display: 'flex', alignItems: 'center', gap: 10 }}>
                     <span style={{ width: 6, height: 6, borderRadius: '50%', background: s.text, flexShrink: 0 }} />
