@@ -3,6 +3,7 @@ import User from "../models/auth.model.js";
 import Notification from "../models/notification.model.js";
 import asyncHandler from "../utils/asyncHandler.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
+import { ApiError } from "../utils/ApiError.js";
 
 export const createRequest = asyncHandler(async (req, res) => {
     const { title, description, location, skills } = req.body;
@@ -42,7 +43,7 @@ export const getRequests = asyncHandler(async (req, res) => {
     res.json(new ApiResponse(200, requests, "Requests retrieved"));
 
     if (!requests) {
-        return res.status(500).json(new ApiResponse(500, {}, "Internal server error"));
+        return res.status(500).json(new ApiError(500, {}, "Internal server error"));
     }
 });
 
@@ -51,12 +52,12 @@ export const getRequestById = asyncHandler(async (req, res) => {
         .populate('author', 'username skills trustScore badges location')
         .populate('helpers', 'username trustScore badges');
 
-    if (!request) return res.status(404).json(new ApiResponse(404, {}, "Not found"));
+    if (!request) return res.status(404).json(new ApiError(404, {}, "Not found"));
     res.json(
         new ApiResponse(200, request, "Request retrieved"));
 
     if (!request) {
-        return res.status(500).json(new ApiResponse(500, {}, "Internal server error"));
+        return res.status(500).json(new ApiError(500, {}, "Internal server error"));
     }
 
 });
@@ -64,10 +65,10 @@ export const getRequestById = asyncHandler(async (req, res) => {
 export const offerHelp = asyncHandler(async (req, res) => {
 
     const request = await Request.findById(req.params.id);
-    if (!request) return res.status(404).json(new ApiResponse(404, {}, "Not found"));
+    if (!request) return res.status(404).json(new ApiError(404, {}, "Not found"));
 
     const alreadyHelping = request.helpers.includes(req.user._id);
-    if (alreadyHelping) return res.status(400).json(new ApiResponse(400, {}, "Already offered help"));
+    if (alreadyHelping) return res.status(400).json(new ApiError(400, {}, "Already offered help"));
 
     request.helpers.push(req.user._id);
     request.status = 'in-progress';
@@ -84,34 +85,41 @@ export const offerHelp = asyncHandler(async (req, res) => {
 });
 
 export const markSolved = asyncHandler(async (req, res) => {
+
     const request = await Request.findById(req.params.id);
     if (!request) return res.status(404).json(
-        new ApiResponse(404, {}, "Not found"));
+        new ApiError(404, {}, "Not found"));
 
     if (String(request.author) !== String(req.user._id))
         return res.status(403).json(
-            new ApiResponse(403, {}, "Only author can mark solved"));
+            new ApiError(403, {}, "Only author can mark solved"));
 
     request.status = 'solved';
     await request.save();
 
     for (const helperId of request.helpers) {
-        const helper = await User.findById(helperId);
-        helper.totalHelped += 1;
-        helper.trustScore += 10;
 
-        if (helper.totalHelped === 1 && !helper.badges.includes('First Helper'))
-            helper.badges.push('First Helper');
-        if (helper.totalHelped === 5 && !helper.badges.includes('Rising Star'))
-            helper.badges.push('Rising Star');
-        if (helper.totalHelped === 10 && !helper.badges.includes('Top Contributor'))
-            helper.badges.push('Top Contributor');
+        const helper = await User.findByIdAndUpdate(
+            helperId,
+            {
+                $inc: { totalHelped: 1, trustScore: 10 }
+            },
+            { new: true }
+        );
 
-        await helper.save();
+        const badges = helper.badges || [];
+        if (helper.totalHelped === 1 && !badges.includes('First Helper'))
+            badges.push('First Helper');
+        if (helper.totalHelped === 5 && !badges.includes('Rising Star'))
+            badges.push('Rising Star');
+        if (helper.totalHelped === 10 && !badges.includes('Top Contributor'))
+            badges.push('Top Contributor');
+
+        await User.findByIdAndUpdate(helperId, { badges });
 
         await Notification.create({
             recipient: helperId,
-            message: `Your help on "${request.title}" was marked as solved! +10 trust score`,
+            message: `Your help on "${request.title}" was marked solved! +10 trust score`,
             type: 'solved',
             link: `/requests/${request._id}`,
         });
@@ -124,7 +132,7 @@ export const markSolved = asyncHandler(async (req, res) => {
 export const deleteRequest = asyncHandler(async (req, res) => {
     const request = await Request.findById(req.params.id);
     if (String(request.author) !== String(req.user._id))
-        return res.status(403).json(new ApiResponse(403, {}, "Not authorized"));
+        return res.status(403).json(new ApiError(403, {}, "Not authorized"));
     await request.deleteOne();
-    res.json(new ApiResponse(200, {}, "Deleted"));
+    res.json(new ApiResponse(200, {}, "Request deleted"));
 });
