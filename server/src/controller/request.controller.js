@@ -130,9 +130,14 @@ export const markSolved = asyncHandler(async (req, res) => {
 });
 
 export const deleteRequest = asyncHandler(async (req, res) => {
+    
     const request = await Request.findById(req.params.id);
+    if (!request) return res.status(404).json(new ApiError(404, {}, "Request not found"));
+    
     if (String(request.author) !== String(req.user._id))
         return res.status(403).json(new ApiError(403, {}, "Not authorized"));
+    
     await request.deleteOne();
+
     res.json(new ApiResponse(200, {}, "Request deleted"));
 });
