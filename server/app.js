@@ -14,9 +14,16 @@ app.use(express.urlencoded({
     limit: "16kb"
 }));
 app.use(cors({
-    origin: process.env.CORS_ORIGIN,
-    credentials: true
+  origin: function(origin, callback) {
+    callback(null, true);
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
 }));
+
+app.options('/{*path}', cors());
+
 app.use(express.static("public"));
 app.use(helmet());
 app.use(cookieParser())
