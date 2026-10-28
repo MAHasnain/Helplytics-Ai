@@ -64,11 +64,14 @@ const userSchema = new Schema({
     },
     password: {
         type: String,
-        match: [
-            /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
-            "Enter a strong password"
-        ],
-        required: true
+        required: true,
+        validate: {
+            validator: function (val) {
+                if (val.startsWith('$2b$') || val.startsWith('$2a$')) return true;
+                return /^(?=.*[A-Z])(?=.*\d).{8,}$/.test(val);
+            },
+            message: 'Enter a strong password'
+        }
     },
     role: {
         type: String,
